@@ -19,6 +19,8 @@ jobs:
       - run: go test ./...
       - run: go run ./cmd/miplang compile testdata/transport.mip -o /tmp/transport.ir.json
       - run: diff -u testdata/transport.ir.json /tmp/transport.ir.json
+      - run: go run ./cmd/miplang compile testdata/transport-ampl.mod -o /tmp/transport-ampl.ir.json
+      - run: diff -u testdata/transport-ampl.ir.json /tmp/transport-ampl.ir.json
 
   python-runtime:
     runs-on: ubuntu-latest

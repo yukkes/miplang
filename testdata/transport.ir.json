@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "miplang.ir/v1alpha1",
+  "schemaVersion": "miplang.ir/v1alpha2",
   "name": "anonymous",
   "sets": [
     {
@@ -9,53 +9,87 @@
   "parameters": [
     {
       "name": "capacity",
-      "domain": "TRIPS"
+      "domain": [
+        {
+          "set": "TRIPS"
+        }
+      ]
     },
     {
       "name": "cost",
-      "domain": "TRIPS"
+      "domain": [
+        {
+          "set": "TRIPS"
+        }
+      ]
     }
   ],
   "variables": [
     {
       "name": "qFixed",
-      "domain": "TRIPS",
+      "domain": [
+        {
+          "set": "TRIPS"
+        }
+      ],
       "type": "integer",
-      "lower": 0
+      "lower": {
+        "expr": {
+          "kind": "number",
+          "value": 0
+        }
+      }
     },
     {
       "name": "qSpot",
-      "domain": "TRIPS",
+      "domain": [
+        {
+          "set": "TRIPS"
+        }
+      ],
       "type": "integer",
-      "lower": 0
+      "lower": {
+        "expr": {
+          "kind": "number",
+          "value": 0
+        }
+      }
     }
   ],
   "constraints": [
     {
       "name": "Capacity",
-      "index": {
-        "name": "t",
-        "set": "TRIPS"
-      },
+      "index": [
+        {
+          "name": "t",
+          "set": "TRIPS"
+        }
+      ],
       "left": {
         "kind": "binary",
         "operator": "+",
         "left": {
           "kind": "reference",
           "name": "qFixed",
-          "index": "t"
+          "indices": [
+            "t"
+          ]
         },
         "right": {
           "kind": "reference",
           "name": "qSpot",
-          "index": "t"
+          "indices": [
+            "t"
+          ]
         }
       },
       "operator": "\u003c=",
       "right": {
         "kind": "reference",
         "name": "capacity",
-        "index": "t"
+        "indices": [
+          "t"
+        ]
       }
     }
   ],
@@ -65,17 +99,21 @@
       "sense": "minimize",
       "expr": {
         "kind": "sum",
-        "iterator": {
-          "name": "t",
-          "set": "TRIPS"
-        },
+        "iterators": [
+          {
+            "name": "t",
+            "set": "TRIPS"
+          }
+        ],
         "body": {
           "kind": "binary",
           "operator": "*",
           "left": {
             "kind": "reference",
             "name": "cost",
-            "index": "t"
+            "indices": [
+              "t"
+            ]
           },
           "right": {
             "kind": "binary",
@@ -83,12 +121,16 @@
             "left": {
               "kind": "reference",
               "name": "qFixed",
-              "index": "t"
+              "indices": [
+                "t"
+              ]
             },
             "right": {
               "kind": "reference",
               "name": "qSpot",
-              "index": "t"
+              "indices": [
+                "t"
+              ]
             }
           }
         }

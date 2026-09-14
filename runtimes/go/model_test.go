@@ -7,7 +7,7 @@ func TestLoadSharedIR(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m.SchemaVersion != "miplang.ir/v1alpha1" || m.Name != "anonymous" {
+	if m.SchemaVersion != "miplang.ir/v1alpha2" || m.Name != "anonymous" {
 		t.Fatalf("unexpected model: %#v", m)
 	}
 	if len(m.Sets) != 1 || m.Sets[0].Name != "TRIPS" {

@@ -20,7 +20,7 @@ func TestRunCompileWritesCanonicalIR(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), `"schemaVersion": "miplang.ir/v1alpha1"`) {
+	if !strings.Contains(string(data), `"schemaVersion": "miplang.ir/v1alpha2"`) {
 		t.Fatalf("unexpected output: %s", data)
 	}
 }
@@ -38,5 +38,25 @@ func TestRunCompileInvalidModelReturnsNonZero(t *testing.T) {
 	}
 	if !strings.Contains(stderr.String(), "unknown symbol missing") {
 		t.Fatalf("stderr=%q", stderr.String())
+	}
+}
+
+func TestAMPL_FILE_001_RunCompileAcceptsModFile(t *testing.T) {
+	dir := t.TempDir()
+	outPath := filepath.Join(dir, "transport-ampl.ir.json")
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"compile", "../../testdata/transport-ampl.mod", "-o", outPath}, bytes.NewReader(nil), &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("code=%d stderr=%s", code, stderr.String())
+	}
+	data, err := os.ReadFile(outPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), `"schemaVersion": "miplang.ir/v1alpha2"`) {
+		t.Fatalf("unexpected output: %s", data)
+	}
+	if !strings.Contains(string(data), `"name": "Trans"`) {
+		t.Fatalf("multidimensional variable missing: %s", data)
 	}
 }
