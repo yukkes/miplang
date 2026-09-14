@@ -120,4 +120,4 @@ MIPLang is inspired by algebraic modeling languages such as AMPL, JuMP, Pyomo, a
 
 ## License
 
-Apache License 2.0. See [`LICENSE`](LICENSE).
+MIT License. See [`LICENSE`](LICENSE).
