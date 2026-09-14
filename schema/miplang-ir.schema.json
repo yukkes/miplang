@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://miplang.dev/schema/miplang-ir-v1alpha1.json",
+  "title": "MIPLang Canonical IR v1alpha1",
+  "type": "object",
+  "required": ["schemaVersion", "name", "sets", "parameters", "variables", "constraints", "objectives"],
+  "properties": {
+    "schemaVersion": { "const": "miplang.ir/v1alpha1" },
+    "name": { "type": "string" },
+    "sets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/named" }
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "domain": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "domain": { "type": "string" },
+          "type": { "enum": ["continuous", "integer", "binary"] },
+          "lower": { "type": "number" },
+          "upper": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "left", "operator", "right"],
+        "properties": {
+          "name": { "type": "string" },
+          "index": { "$ref": "#/$defs/iterator" },
+          "left": { "$ref": "#/$defs/expression" },
+          "operator": { "enum": ["<=", ">=", "=="] },
+          "right": { "$ref": "#/$defs/expression" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "sense", "expr"],
+        "properties": {
+          "name": { "type": "string" },
+          "sense": { "enum": ["minimize", "maximize"] },
+          "expr": { "$ref": "#/$defs/expression" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "named": {
+      "type": "object",
+      "required": ["name"],
+      "properties": { "name": { "type": "string" } },
+      "additionalProperties": false
+    },
+    "iterator": {
+      "type": "object",
+      "required": ["name", "set"],
+      "properties": {
+        "name": { "type": "string" },
+        "set": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "expression": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["number", "reference", "unary", "binary", "sum"] },
+        "value": { "type": "number" },
+        "name": { "type": "string" },
+        "index": { "type": "string" },
+        "operator": { "enum": ["+", "-", "*"] },
+        "left": { "$ref": "#/$defs/expression" },
+        "right": { "$ref": "#/$defs/expression" },
+        "operand": { "$ref": "#/$defs/expression" },
+        "iterator": { "$ref": "#/$defs/iterator" },
+        "body": { "$ref": "#/$defs/expression" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
