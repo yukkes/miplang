@@ -1,0 +1,7 @@
+set TRIPS;
+param capacity[TRIPS];
+param cost[TRIPS];
+var qFixed[TRIPS] integer >= 0;
+var qSpot[TRIPS] integer >= 0;
+constraint Capacity[t in TRIPS]: qFixed[t] + qSpot[t] <= capacity[t];
+minimize Cost: sum[t in TRIPS] { cost[t] * (qFixed[t] + qSpot[t]) };

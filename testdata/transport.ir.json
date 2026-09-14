@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "miplang.ir/v1alpha1",
+  "name": "anonymous",
+  "sets": [
+    {
+      "name": "TRIPS"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "capacity",
+      "domain": "TRIPS"
+    },
+    {
+      "name": "cost",
+      "domain": "TRIPS"
+    }
+  ],
+  "variables": [
+    {
+      "name": "qFixed",
+      "domain": "TRIPS",
+      "type": "integer",
+      "lower": 0
+    },
+    {
+      "name": "qSpot",
+      "domain": "TRIPS",
+      "type": "integer",
+      "lower": 0
+    }
+  ],
+  "constraints": [
+    {
+      "name": "Capacity",
+      "index": {
+        "name": "t",
+        "set": "TRIPS"
+      },
+      "left": {
+        "kind": "binary",
+        "operator": "+",
+        "left": {
+          "kind": "reference",
+          "name": "qFixed",
+          "index": "t"
+        },
+        "right": {
+          "kind": "reference",
+          "name": "qSpot",
+          "index": "t"
+        }
+      },
+      "operator": "\u003c=",
+      "right": {
+        "kind": "reference",
+        "name": "capacity",
+        "index": "t"
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "name": "Cost",
+      "sense": "minimize",
+      "expr": {
+        "kind": "sum",
+        "iterator": {
+          "name": "t",
+          "set": "TRIPS"
+        },
+        "body": {
+          "kind": "binary",
+          "operator": "*",
+          "left": {
+            "kind": "reference",
+            "name": "cost",
+            "index": "t"
+          },
+          "right": {
+            "kind": "binary",
+            "operator": "+",
+            "left": {
+              "kind": "reference",
+              "name": "qFixed",
+              "index": "t"
+            },
+            "right": {
+              "kind": "reference",
+              "name": "qSpot",
+              "index": "t"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
