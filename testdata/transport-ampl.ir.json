@@ -1,0 +1,188 @@
+{
+  "schemaVersion": "miplang.ir/v1alpha2",
+  "name": "anonymous",
+  "sets": [
+    {
+      "name": "ORIG"
+    },
+    {
+      "name": "DEST"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "supply",
+      "domain": [
+        {
+          "set": "ORIG"
+        }
+      ],
+      "lower": {
+        "expr": {
+          "kind": "number",
+          "value": 0
+        }
+      }
+    },
+    {
+      "name": "demand",
+      "domain": [
+        {
+          "set": "DEST"
+        }
+      ],
+      "lower": {
+        "expr": {
+          "kind": "number",
+          "value": 0
+        }
+      }
+    },
+    {
+      "name": "cost",
+      "domain": [
+        {
+          "set": "ORIG"
+        },
+        {
+          "set": "DEST"
+        }
+      ],
+      "lower": {
+        "expr": {
+          "kind": "number",
+          "value": 0
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "name": "Trans",
+      "domain": [
+        {
+          "set": "ORIG"
+        },
+        {
+          "set": "DEST"
+        }
+      ],
+      "type": "continuous",
+      "lower": {
+        "expr": {
+          "kind": "number",
+          "value": 0
+        }
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "Supply",
+      "index": [
+        {
+          "name": "i",
+          "set": "ORIG"
+        }
+      ],
+      "left": {
+        "kind": "sum",
+        "iterators": [
+          {
+            "name": "j",
+            "set": "DEST"
+          }
+        ],
+        "body": {
+          "kind": "reference",
+          "name": "Trans",
+          "indices": [
+            "i",
+            "j"
+          ]
+        }
+      },
+      "operator": "=",
+      "right": {
+        "kind": "reference",
+        "name": "supply",
+        "indices": [
+          "i"
+        ]
+      }
+    },
+    {
+      "name": "Demand",
+      "index": [
+        {
+          "name": "j",
+          "set": "DEST"
+        }
+      ],
+      "left": {
+        "kind": "sum",
+        "iterators": [
+          {
+            "name": "i",
+            "set": "ORIG"
+          }
+        ],
+        "body": {
+          "kind": "reference",
+          "name": "Trans",
+          "indices": [
+            "i",
+            "j"
+          ]
+        }
+      },
+      "operator": "=",
+      "right": {
+        "kind": "reference",
+        "name": "demand",
+        "indices": [
+          "j"
+        ]
+      }
+    }
+  ],
+  "objectives": [
+    {
+      "name": "Total_Cost",
+      "sense": "minimize",
+      "expr": {
+        "kind": "sum",
+        "iterators": [
+          {
+            "name": "i",
+            "set": "ORIG"
+          },
+          {
+            "name": "j",
+            "set": "DEST"
+          }
+        ],
+        "body": {
+          "kind": "binary",
+          "operator": "*",
+          "left": {
+            "kind": "reference",
+            "name": "cost",
+            "indices": [
+              "i",
+              "j"
+            ]
+          },
+          "right": {
+            "kind": "reference",
+            "name": "Trans",
+            "indices": [
+              "i",
+              "j"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
