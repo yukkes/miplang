@@ -1,9 +1,6 @@
 package lexer
 
-import (
-	"fmt"
-	"unicode"
-)
+import "fmt"
 
 type Kind string
 
@@ -24,6 +21,10 @@ const (
 	Plus         Kind = "+"
 	Minus        Kind = "-"
 	Star         Kind = "*"
+	Slash        Kind = "/"
+	Less         Kind = "<"
+	Greater      Kind = ">"
+	Equal        Kind = "="
 	LessEqual    Kind = "<="
 	GreaterEqual Kind = ">="
 	EqualEqual   Kind = "=="
@@ -39,7 +40,7 @@ type Token struct {
 
 var keywords = map[string]struct{}{
 	"set": {}, "param": {}, "var": {}, "integer": {}, "binary": {},
-	"constraint": {}, "minimize": {}, "maximize": {}, "sum": {}, "in": {},
+	"constraint": {}, "subject": {}, "to": {}, "minimize": {}, "maximize": {}, "sum": {}, "in": {},
 }
 
 func Lex(src string) ([]Token, error) {
@@ -58,10 +59,42 @@ func Lex(src string) ([]Token, error) {
 			col = 1
 			continue
 		}
+		if c == '#' {
+			for i < len(src) && src[i] != '\n' {
+				i++
+				col++
+			}
+			continue
+		}
 		if c == '/' && i+1 < len(src) && src[i+1] == '/' {
 			for i < len(src) && src[i] != '\n' {
 				i++
 				col++
+			}
+			continue
+		}
+		if c == '/' && i+1 < len(src) && src[i+1] == '*' {
+			i += 2
+			col += 2
+			closed := false
+			for i < len(src) {
+				if i+1 < len(src) && src[i] == '*' && src[i+1] == '/' {
+					i += 2
+					col += 2
+					closed = true
+					break
+				}
+				if src[i] == '\n' {
+					i++
+					line++
+					col = 1
+					continue
+				}
+				i++
+				col++
+			}
+			if !closed {
+				return nil, fmt.Errorf("unterminated block comment at %d:%d", line, col)
 			}
 			continue
 		}
@@ -82,11 +115,37 @@ func Lex(src string) ([]Token, error) {
 			continue
 		}
 		if isDigit(c) || (c == '.' && i+1 < len(src) && isDigit(src[i+1])) {
+			hasDot := c == '.'
 			i++
 			col++
-			for i < len(src) && (isDigit(src[i]) || src[i] == '.') {
+			for i < len(src) && isDigit(src[i]) {
 				i++
 				col++
+			}
+			if i < len(src) && src[i] == '.' && !hasDot {
+				hasDot = true
+				i++
+				col++
+				for i < len(src) && isDigit(src[i]) {
+					i++
+					col++
+				}
+			}
+			if i < len(src) && (src[i] == 'e' || src[i] == 'E') {
+				i++
+				col++
+				if i < len(src) && (src[i] == '+' || src[i] == '-') {
+					i++
+					col++
+				}
+				exponentStart := i
+				for i < len(src) && isDigit(src[i]) {
+					i++
+					col++
+				}
+				if exponentStart == i {
+					return nil, fmt.Errorf("invalid numeric exponent at %d:%d", startLine, startCol)
+				}
 			}
 			out = append(out, Token{Kind: Number, Literal: src[start:i], Offset: start, Line: startLine, Column: startCol})
 			continue
@@ -135,6 +194,14 @@ func Lex(src string) ([]Token, error) {
 			kind = Minus
 		case '*':
 			kind = Star
+		case '/':
+			kind = Slash
+		case '<':
+			kind = Less
+		case '>':
+			kind = Greater
+		case '=':
+			kind = Equal
 		default:
 			return nil, fmt.Errorf("unexpected character %q at %d:%d", c, line, col)
 		}
@@ -146,6 +213,6 @@ func Lex(src string) ([]Token, error) {
 	return out, nil
 }
 
-func isIdentStart(c byte) bool    { return c == '_' || unicode.IsLetter(rune(c)) }
+func isIdentStart(c byte) bool    { return c == '_' || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') }
 func isIdentContinue(c byte) bool { return isIdentStart(c) || isDigit(c) }
 func isDigit(c byte) bool         { return c >= '0' && c <= '9' }

@@ -1,48 +1,70 @@
 package parser
 
 type Model struct {
-	Sets        []SetDecl
-	Params      []ParamDecl
-	Vars        []VarDecl
-	Constraints []ConstraintDecl
-	Objectives  []ObjectiveDecl
+	Declarations []Declaration
+	Sets         []SetDecl
+	Params       []ParamDecl
+	Vars         []VarDecl
+	Constraints  []ConstraintDecl
+	Objectives   []ObjectiveDecl
 }
 
+type Declaration interface{ declNode() }
+
 type SetDecl struct{ Name string }
-type ParamDecl struct {
-	Name   string
-	Domain string
+
+type Bound struct {
+	Expr   Expr
+	Strict bool
 }
+
+type ParamDecl struct {
+	Name    string
+	Domain  []Iterator
+	Integer bool
+	Lower   *Bound
+	Upper   *Bound
+}
+
 type VarDecl struct {
 	Name    string
-	Domain  string
+	Domain  []Iterator
 	Integer bool
 	Binary  bool
-	Lower   *float64
-	Upper   *float64
+	Lower   *Bound
+	Upper   *Bound
 }
+
 type Iterator struct {
 	Name string
 	Set  string
 }
+
 type ConstraintDecl struct {
-	Name  string
-	Index *Iterator
-	Left  Expr
-	Op    string
-	Right Expr
+	Name    string
+	Indices []Iterator
+	Parts   []Expr
+	Ops     []string
 }
+
 type ObjectiveDecl struct {
-	Name  string
-	Sense string
-	Expr  Expr
+	Name    string
+	Sense   string
+	Indices []Iterator
+	Expr    Expr
 }
+
+func (SetDecl) declNode()        {}
+func (ParamDecl) declNode()      {}
+func (VarDecl) declNode()        {}
+func (ConstraintDecl) declNode() {}
+func (ObjectiveDecl) declNode()  {}
 
 type Expr interface{ exprNode() }
 type NumberExpr struct{ Value float64 }
 type RefExpr struct {
-	Name  string
-	Index string
+	Name    string
+	Indices []string
 }
 type UnaryExpr struct {
 	Op    string
@@ -53,8 +75,8 @@ type BinaryExpr struct {
 	Left, Right Expr
 }
 type SumExpr struct {
-	Index Iterator
-	Body  Expr
+	Indices []Iterator
+	Body    Expr
 }
 
 func (NumberExpr) exprNode() {}
